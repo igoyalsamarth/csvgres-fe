@@ -5,8 +5,9 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbS
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown, CircleHelp } from "lucide-react";
+import { Check, ChevronsUpDown, CircleHelp, CreditCard, Folders, GitCompareArrows, Settings } from "lucide-react";
 import { useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -115,7 +116,56 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Avatar>
         </div>
       </header>
-      {children}
+      <main className="min-h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] flex overflow-clip">
+        <SidebarProvider>
+          <Sidebar collapsible="none" variant="floating" className="!max-h-[calc(100vh-64px)] flex">
+            {/* <SidebarHeader>
+        <TeamSwitcher teams={data.teams} />
+      </SidebarHeader> */}
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel className="font-medium">ACCOUNT</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem className="px-2">
+                      <SidebarMenuButton asChild>
+                        <a href="#">
+                          <Folders />
+                          <span>Projects</span>
+                        </a>
+                      </SidebarMenuButton>
+                      <SidebarMenuButton asChild>
+                        <a href="#">
+                          <CreditCard />
+                          <span>Billing</span>
+                        </a>
+                      </SidebarMenuButton>
+                      <SidebarMenuButton asChild>
+                        <a href="#">
+                          <GitCompareArrows />
+                          <span>Integrations</span>
+                        </a>
+                      </SidebarMenuButton>
+                      <SidebarMenuButton asChild>
+                        <a href="#">
+                          <Settings />
+                          <span>Settings</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+            {/* <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter> */}
+          </Sidebar>
+          <main className="max-h-[calc(100vh-64px)] p-8 flex justify-between w-full">
+            {children}
+          </main>
+        </SidebarProvider>
+      </main>
     </div>
   );
 }
