@@ -1,5 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { DialogClose } from "@/components/ui/dialog";
+import { DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { PlugIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -7,10 +12,40 @@ export default function Page() {
       <div className="flex justify-between items-end">
         <p className="text-2xl font-bold leading-none">Project Dashboard</p>
         <div className="flex gap-2">
-          <Button>
-            <PlugIcon />
-            Connect
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <PlugIcon />
+                Connect
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Connect to your database</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="database">
+                    Database
+                  </Label>
+                  <p>db name option</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="username">
+                    Connection String
+                  </Label>
+                  <div className=" bg-secondary px-2 py-1 border rounded-md">
+                    testing this is a uri
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline">
             Go to Billing
           </Button>
@@ -20,7 +55,7 @@ export default function Page() {
         <div className="flex justify-between items-center">
           <p>Usage since Feb 1, 2025
           </p>
-          <p className="text-blue-500 text-sm font-semibold">Upgrade</p>
+          <Link href="/app/billing" className="text-blue-500 text-sm font-semibold">Upgrade</Link>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
