@@ -25,16 +25,9 @@ export default function Page() {
   const router = useRouter();
   const { data: projects, error, isLoading } = useApiQuery<Project[]>(["projects"], "/projects");
 
-  // Add better debugging
-  console.log("Projects data:", projects);
-  console.log("Type of projects:", typeof projects);
-  console.log("Is Array:", Array.isArray(projects));
-
-  // Add error and loading states
   if (error) return <div>Error loading projects: {error.message}</div>;
   if (isLoading) return <div>Loading...</div>;
 
-  // Ensure projects is an array before mapping
   const projectsList = Array.isArray(projects) ? projects : [];
 
   return (
