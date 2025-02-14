@@ -10,10 +10,10 @@ import { Button } from "../ui/button";
 import { PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Popover } from "../ui/popover";
 import { Command } from "../ui/command";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 export default function Header() {
 
   const frameworks = [
@@ -116,10 +116,7 @@ export default function Header() {
           <CircleHelp className="size-6" />
         </Button>
         <Button>Upgrade</Button>
-        <Avatar className="size-8 rounded" >
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
+        <UserButton />
       </div>
     </header>
   );

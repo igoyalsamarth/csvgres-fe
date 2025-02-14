@@ -12,9 +12,30 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { EllipsisVertical, GalleryVertical, Settings, TerminalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useApiQuery } from "@/hooks/useApi";
+
+interface Project {
+  id: string;
+  name: string;
+  region: string;
+  createdAt: string;
+}
 
 export default function Page() {
   const router = useRouter();
+  const { data: projects, error, isLoading } = useApiQuery<Project[]>(["projects"], "/projects");
+
+  // Add better debugging
+  console.log("Projects data:", projects);
+  console.log("Type of projects:", typeof projects);
+  console.log("Is Array:", Array.isArray(projects));
+
+  // Add error and loading states
+  if (error) return <div>Error loading projects: {error.message}</div>;
+  if (isLoading) return <div>Loading...</div>;
+
+  // Ensure projects is an array before mapping
+  const projectsList = Array.isArray(projects) ? projects : [];
 
   return (
     <div className="flex flex-col max-w-[1280px] w-full mx-auto gap-6 p-8">
@@ -131,6 +152,43 @@ export default function Page() {
                 </DropdownMenu>
               </td>
             </tr>
+            {projectsList.map((project) => (
+              <tr key={project.id} onClick={() => router.push(`/app/projects/${project.id}`)} className="hover:bg-secondary cursor-pointer duration-150">
+                <td className="px-4 py-1 text-sm">{project.name}</td>
+                <td className="px-4 py-1 text-sm">{project.region}</td>
+                <td className="px-4 py-1 text-sm">{project.createdAt}</td>
+                <td className="px-4 py-1 text-sm">-</td>
+                <td className="p-4" onClick={e => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost"><EllipsisVertical /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-10">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/app/projects/${project.id}`}>
+                            <GalleryVertical />
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/app/projects/${project.id}/query`}>
+                            <TerminalIcon />
+                            SQL Editor
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/app/projects/${project.id}/settings/general`}>
+                            <Settings />
+                            Settings
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
