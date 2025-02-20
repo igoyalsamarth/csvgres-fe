@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main className="min-h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] flex overflow-clip">
         <SidebarProvider>
           <SideNavbar />
-          <main className="max-h-[calc(100vh-64px)] flex justify-between w-full">
+          <main className="max-h-[calc(100vh-64px)] flex justify-between w-full overflow-y-auto">
             {children}
           </main>
         </SidebarProvider>

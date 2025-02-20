@@ -12,18 +12,31 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { EllipsisVertical, GalleryVertical, Settings, TerminalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useApiQuery } from "@/hooks/useApi";
-
+import { useApiMutation, useApiQuery } from "@/hooks/useApi";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
 interface Project {
-  id: string;
-  name: string;
+  projectid: string;
+  projectname: string;
   region: string;
-  createdAt: string;
+  createdat: string;
 }
 
 export default function Page() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
+
   const { data: projects, error, isLoading } = useApiQuery<Project[]>(["projects"], "/projects");
+  const { mutate: createProject, isPending: isCreatingProject } = useApiMutation("/project", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      setOpen(false);
+      setProjectName("");
+    }
+  });
 
   if (error) return <div>Error loading projects: {error.message}</div>;
   if (isLoading) return <div>Loading...</div>;
@@ -34,7 +47,7 @@ export default function Page() {
     <div className="flex flex-col max-w-[1280px] w-full mx-auto gap-6 p-8">
       <div className="flex justify-between items-end">
         <p className="text-2xl font-bold leading-none">Your Projects</p>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <TooltipProvider>
             <Tooltip delayDuration={100}>
               <DialogTrigger asChild>
@@ -57,13 +70,18 @@ export default function Page() {
               <Label htmlFor="name">
                 Name
               </Label>
-              <Input id="name" placeholder="Name will be auto-generated if left blank" className="col-span-3" />
+              <Input id="name" placeholder="Name will be auto-generated if left blank" className="col-span-3" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
             </div>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button>Create Project</Button>
+              <Button
+                onClick={() => createProject({ name: projectName })}
+                disabled={isCreatingProject}
+              >
+                {isCreatingProject ? "Creating..." : "Create Project"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -146,10 +164,10 @@ export default function Page() {
               </td>
             </tr>
             {projectsList.map((project) => (
-              <tr key={project.id} onClick={() => router.push(`/app/projects/${project.id}`)} className="hover:bg-secondary cursor-pointer duration-150">
-                <td className="px-4 py-1 text-sm">{project.name}</td>
+              <tr key={project.projectid} onClick={() => router.push(`/app/projects/${project.projectid}`)} className="hover:bg-secondary cursor-pointer duration-150">
+                <td className="px-4 py-1 text-sm">{project.projectname}</td>
                 <td className="px-4 py-1 text-sm">{project.region}</td>
-                <td className="px-4 py-1 text-sm">{project.createdAt}</td>
+                <td className="px-4 py-1 text-sm">{dayjs(project.createdat).format("DD MMMM YYYY")}</td>
                 <td className="px-4 py-1 text-sm">-</td>
                 <td className="p-4" onClick={e => e.stopPropagation()}>
                   <DropdownMenu>
@@ -159,19 +177,19 @@ export default function Page() {
                     <DropdownMenuContent className="w-10">
                       <DropdownMenuGroup>
                         <DropdownMenuItem asChild>
-                          <Link href={`/app/projects/${project.id}`}>
+                          <Link href={`/app/projects/${project.projectid}`}>
                             <GalleryVertical />
                             Dashboard
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/app/projects/${project.id}/query`}>
+                          <Link href={`/app/projects/${project.projectid}/query`}>
                             <TerminalIcon />
                             SQL Editor
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/app/projects/${project.id}/settings/general`}>
+                          <Link href={`/app/projects/${project.projectid}/settings/general`}>
                             <Settings />
                             Settings
                           </Link>
