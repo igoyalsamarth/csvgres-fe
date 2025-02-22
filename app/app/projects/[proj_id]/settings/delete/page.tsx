@@ -2,12 +2,16 @@
 import { Button } from "@/components/ui/button";
 import { useApiDelete } from "@/hooks/useApi";
 import { TriangleAlert } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function Page() {
   const { proj_id } = useParams();
-
-  const { mutate: deleteProject } = useApiDelete(`/project/delete/${proj_id}`);
+  const router = useRouter();
+  const { mutate: deleteProject } = useApiDelete(`/project/delete`, {
+    onSuccess: () => {
+      router.push("/app/projects");
+    }
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -20,7 +24,7 @@ export default function Page() {
         </div>
       </div>
       <Button variant="destructive" onClick={() => {
-        deleteProject();
+        deleteProject(proj_id as string);
       }}>Delete Project</Button>
     </div>
   )

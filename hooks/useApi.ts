@@ -45,16 +45,16 @@ export function useApiMutation<T, TVariables>(
 
 export function useApiDelete<T>(
   endpoint: string,
-  options?: Omit<UseMutationOptions<T, AxiosError, void>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<T, AxiosError, string>, 'mutationFn'>
 ) {
   const { isSignedIn, isLoaded } = useAuthToken();
 
-  return useMutation<T, AxiosError, void>({
-    mutationFn: async () => {
+  return useMutation<T, AxiosError, string>({
+    mutationFn: async (id) => {
       if (!isLoaded) throw new Error('Auth not loaded');
       if (!isSignedIn) throw new Error('Not signed in');
 
-      const response = await axiosInstance.delete(endpoint);
+      const response = await axiosInstance.delete(`${endpoint}/${id}`);
       return response.data;
     },
     ...options,

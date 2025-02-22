@@ -39,7 +39,7 @@ export default function Page() {
   });
 
   if (error) return <div>Error loading projects: {error.message}</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading || !projects) return <div>Loading...</div>;
 
   const projectsList = Array.isArray(projects) ? projects : [];
 

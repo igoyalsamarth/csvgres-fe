@@ -1,5 +1,5 @@
 'use client'
-import { Handshake, Settings, CreditCard, Folders, LayoutDashboard, TerminalSquare, Table } from "lucide-react";
+import { Handshake, Settings, CreditCard, Folders, LayoutDashboard, TerminalSquare, Table, Database } from "lucide-react";
 import { Sidebar, SidebarFooter, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarContent, SidebarGroupLabel } from "../ui/sidebar";
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -18,6 +18,11 @@ export default function SideNavbar() {
           label: "Dashboard",
           href: `/app/projects/${projectId}`,
           icon: LayoutDashboard
+        },
+        {
+          label: "Databases",
+          href: `/app/projects/${projectId}/databases`,
+          icon: Database
         },
         {
           label: "SQL Editor",
