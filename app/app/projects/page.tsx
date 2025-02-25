@@ -21,7 +21,16 @@ interface Project {
   projectname: string;
   region: string;
   createdat: string;
+  databases: DatabaseNumbers[];
 }
+interface DatabaseNumbers {
+  database_id: string;
+  storage: number;
+  data_transfer: number;
+  compute: number;
+}
+
+type Projects = Project[]
 
 export default function Page() {
   const router = useRouter();
@@ -29,7 +38,8 @@ export default function Page() {
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
 
-  const { data: projects, error, isLoading } = useApiQuery<Project[]>(["projects"], "/projects");
+  const { data: projects = [], error, isLoading } = useApiQuery<Projects>(["projects"], "/projects");
+
   const { mutate: createProject, isPending: isCreatingProject } = useApiMutation("/project", {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -41,7 +51,9 @@ export default function Page() {
   if (error) return <div>Error loading projects: {error.message}</div>;
   if (isLoading || !projects) return <div>Loading...</div>;
 
-  const projectsList = Array.isArray(projects) ? projects : [];
+  const totalStorage = projects.reduce((acc, project) => acc + project.databases.reduce((sum, db) => sum + db.storage, 0), 0);
+  const totalDataTransfer = projects.reduce((acc, project) => acc + project.databases.reduce((sum, db) => sum + db.data_transfer, 0), 0);
+  const totalCompute = projects.reduce((acc, project) => acc + project.databases.reduce((sum, db) => sum + db.compute, 0), 0);
 
   return (
     <div className="flex flex-col max-w-[1280px] w-full mx-auto gap-6 p-8">
@@ -58,7 +70,7 @@ export default function Page() {
                 </TooltipTrigger>
               </DialogTrigger>
               <TooltipContent side="bottom">
-                <p>You can create 9 more projects</p>
+                <p>You can create {10 - projects.length} more projects</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -90,26 +102,26 @@ export default function Page() {
         <div className="flex justify-between items-center">
           <p className="font-semibold">Account Usage</p>
           <div className="flex gap-1">
-            <p className="text-sm text-muted-foreground">Feb 1, 2025 to now •</p>
+            <p className="text-sm text-muted-foreground">{dayjs().startOf('month').format('MMM D, YYYY')} to now •</p>
             <Link href="/app/billing" className="text-blue-500 text-sm font-semibold">Upgrade</Link>
           </div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Storage</p>
-            <p className="text-2xl font-semibold">0.04 <span className="text-sm font-normal">/ 0.5 GB</span></p>
+            <p className="text-2xl font-semibold">{(totalStorage / 1024).toFixed(2)} <span className="text-sm font-normal">/ 0.5 GB</span></p>
           </div>
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Compute</p>
-            <p className="text-2xl font-semibold">0.07 <span className="text-sm font-normal">/ 200 h</span></p>
+            <p className="text-2xl font-semibold">{(totalCompute / 3600000).toFixed(2)} <span className="text-sm font-normal">/ 200 h</span></p>
           </div>
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Data Transfer</p>
-            <p className="text-2xl font-semibold">0 <span className="text-sm font-normal">/ 5 GB</span></p>
+            <p className="text-2xl font-semibold">{(totalDataTransfer / 1024).toFixed(2)} <span className="text-sm font-normal">/ 5 GB</span></p>
           </div>
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Projects</p>
-            <p className="text-2xl font-semibold">1 <span className="text-sm font-normal">/ 10</span></p>
+            <p className="text-2xl font-semibold">{projects.length} <span className="text-sm font-normal">/ 10</span></p>
           </div>
         </div>
         <p className="text-sm text-muted-foreground leading-none">
@@ -128,47 +140,12 @@ export default function Page() {
             </tr>
           </thead>
           <tbody>
-            <tr onClick={() => router.push("/app/projects/project-1")} className="hover:bg-secondary cursor-pointer duration-150">
-              <td className="px-4 py-1 text-sm">Project 1</td>
-              <td className="px-4 py-1 text-sm">AWS - Mumbai</td>
-              <td className="px-4 py-1 text-sm">9 October 2024</td>
-              <td className="px-4 py-1 text-sm">24 MB</td>
-              <td className="p-4" onClick={e => e.stopPropagation()}>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost"><EllipsisVertical /></Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-10">
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem asChild>
-                        <Link href="/app/projects/project-1">
-                          <GalleryVertical />
-                          Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/app/projects/project-1/query">
-                          <TerminalIcon />
-                          SQL Editor
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/app/projects/project-1/settings/general">
-                          <Settings />
-                          Settings
-                        </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </td>
-            </tr>
-            {projectsList.map((project) => (
+            {projects.map((project) => (
               <tr key={project.projectid} onClick={() => router.push(`/app/projects/${project.projectid}`)} className="hover:bg-secondary cursor-pointer duration-150">
                 <td className="px-4 py-1 text-sm">{project.projectname}</td>
                 <td className="px-4 py-1 text-sm">{project.region}</td>
                 <td className="px-4 py-1 text-sm">{dayjs(project.createdat).format("DD MMMM YYYY")}</td>
-                <td className="px-4 py-1 text-sm">-</td>
+                <td className="px-4 py-1 text-sm">{(project.databases.reduce((sum, db) => sum + db.storage, 0) / 1024).toFixed(2)} GB</td>
                 <td className="p-4" onClick={e => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

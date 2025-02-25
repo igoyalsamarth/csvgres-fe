@@ -1,12 +1,42 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@/components/ui/dialog";
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { useApiQuery } from "@/hooks/useApi";
 import { PlugIcon } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+
+interface Project {
+  projectid: string;
+  projectname: string;
+  region: string;
+  createdat: string;
+  databases: Database[];
+}
+
+interface Database {
+  database_id: string;
+  storage: number;
+  data_transfer: number;
+  compute: number;
+}
 
 export default function Page() {
+  const params = useParams();
+  const proj_id = params.proj_id as string;
+
+  const { data: project = {} as Project, isLoading, error } = useApiQuery<Project>(["project", proj_id], `/project/${proj_id}`);
+
+  if (error) return <div>Error loading project: {error.message}</div>;
+  if (isLoading || !project || !project.databases) return <div>Loading...</div>;
+
+  const totalStorage = project?.databases?.reduce((acc, db) => acc + db.storage, 0);
+  const totalDataTransfer = project?.databases?.reduce((acc, db) => acc + db.data_transfer, 0);
+  const totalCompute = project?.databases?.reduce((acc, db) => acc + db.compute, 0);
+
   return (
     <div className="flex flex-col max-w-[1280px] w-full mx-auto gap-6 p-8">
       <div className="flex justify-between items-end">
@@ -60,19 +90,19 @@ export default function Page() {
         <div className="grid grid-cols-4 gap-2">
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Storage</p>
-            <p className="text-2xl font-semibold">0.04 <span className="text-sm font-normal">/ 0.5 GB</span></p>
+            <p className="text-2xl font-semibold">{(totalStorage / 1024).toFixed(2)} GB</p>
           </div>
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Compute</p>
-            <p className="text-2xl font-semibold">0.07 <span className="text-sm font-normal">/ 200 h</span></p>
+            <p className="text-2xl font-semibold">{(totalCompute / 3600000).toFixed(2)} h</p>
           </div>
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
             <p className="text-sm">Data Transfer</p>
-            <p className="text-2xl font-semibold">0 <span className="text-sm font-normal">/ 5 GB</span></p>
+            <p className="text-2xl font-semibold">{(totalDataTransfer / 1024).toFixed(2)} GB</p>
           </div>
           <div className="flex flex-col gap-1 bg-background rounded-lg px-5 py-4">
-            <p className="text-sm">Projects</p>
-            <p className="text-2xl font-semibold">1 <span className="text-sm font-normal">/ 10</span></p>
+            <p className="text-sm">Databases</p>
+            <p className="text-2xl font-semibold">{project?.databases?.length}</p>
           </div>
         </div>
         <p className="text-sm text-muted-foreground leading-none">
