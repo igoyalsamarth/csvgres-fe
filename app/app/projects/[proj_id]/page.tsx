@@ -4,8 +4,9 @@ import { DialogClose } from "@/components/ui/dialog";
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useApiQuery } from "@/hooks/useApi";
-import { PlugIcon } from "lucide-react";
+import { CopyIcon, EyeIcon, PlugIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -19,6 +20,7 @@ interface Project {
 
 interface Database {
   database_id: string;
+  database_name: string;
   storage: number;
   data_transfer: number;
   compute: number;
@@ -49,23 +51,88 @@ export default function Page() {
                 Connect
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[748px]">
               <DialogHeader>
                 <DialogTitle>Connect to your database</DialogTitle>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="database">
-                    Database
-                  </Label>
-                  <p>db name option</p>
+              <div className="flex flex-col gap-8 w-full">
+                <div className="flex gap-4 w-full items-end">
+                  <div className="flex flex-col gap-2 w-1/2">
+                    <Label htmlFor="database">
+                      Database
+                    </Label>
+                    <Select defaultValue={project.databases[0].database_id}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a database" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {project.databases.map((db) => (
+                            <SelectItem key={db.database_id} value={db.database_id}>
+                              {db.database_name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-2 w-1/2">
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor="database">
+                        Role
+                      </Label>
+                      <Button variant="link" className="p-0 text-muted-foreground h-fit s-fit">
+                        Reset Password
+                      </Button>
+                    </div>
+                    <Select defaultValue={project.databases[0].database_id}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a database" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {project.databases.map((db) => (
+                            <SelectItem key={db.database_id} value={db.database_id}>
+                              {db.database_name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="username">
+                  <Label htmlFor="uri">
                     Connection String
                   </Label>
-                  <div className=" bg-secondary px-2 py-1 border rounded-md">
-                    testing this is a uri
+                  <div className="flex flex-col gap-0.5">
+                    <div className="bg-secondary px-4 py-2 rounded-t-md min-h-[200px] text-sm font-mono connection-string">
+                      postgresql://{project.databases[0].database_name}:{project.databases[0].database_name}@{proj_id}.ap-southeast-1.aws.neon.tech/{project.databases[0].database_name}
+                    </div>
+                    <div className="bg-secondary px-2 py-1 rounded-b-md flex gap-4">
+                      <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+                        <EyeIcon />
+                        Show Password
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => {
+                          const connectionStringDiv = document.querySelector('.connection-string') as HTMLDivElement;
+                          if (connectionStringDiv) {
+                            navigator.clipboard.writeText(connectionStringDiv.textContent || '');
+                            const btn = document.activeElement as HTMLButtonElement;
+                            const icon = btn.querySelector('svg');
+                            if (icon) {
+                              icon.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
+                            }
+                          }
+                        }}
+                      >
+                        <CopyIcon />
+                        Copy Snippet
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
