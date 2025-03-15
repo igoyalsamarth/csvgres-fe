@@ -43,6 +43,24 @@ export function useApiMutation<T, TVariables>(
   });
 }
 
+export function useApiPut<T, TVariables>(
+  endpoint: string,
+  options?: Omit<UseMutationOptions<T, AxiosError, TVariables>, 'mutationFn'>
+) {
+  const { isSignedIn, isLoaded } = useAuthToken();
+
+  return useMutation<T, AxiosError, TVariables>({
+    mutationFn: async (variables) => {
+      if (!isLoaded) throw new Error('Auth not loaded');
+      if (!isSignedIn) throw new Error('Not signed in');
+
+      const response = await axiosInstance.post(endpoint, variables);
+      return response.data;
+    },
+    ...options,
+  });
+}
+
 export function useApiDelete<T>(
   endpoint: string,
   options?: Omit<UseMutationOptions<T, AxiosError, string>, 'mutationFn'>
